@@ -1,0 +1,134 @@
+﻿@page "/Errores"
+@page "/Errores/{errorId:int}"
+
+@using BLL
+@using Models
+
+@inject IToastService toast
+
+<EditForm Model="Error" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <div class="card">
+        <div class="card-header text-lg-center">
+            <h3 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif ">Registro de errores</h3>
+        </div>
+        <div class="card-body">
+            <form>
+
+                @*ErrorId*@
+                <div class="form-row align-items-center">
+                    <div class="col">
+                        <div class="form-group">
+                            <label>ErrorId</label>
+                            <div class="input-group">
+                                <InputNumber @bind-Value="Error.errorId" class="form-control col-4" />
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-primary input-group-text" @onclick="Buscar">Buscar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @*Hallazgo*@
+                <div class="form-group">
+                    <label>Hallazgo</label>
+                    <InputText @bind-Value="Error.hallazgo" class="form-control" />
+                    <ValidationMessage For="@(() => Error.hallazgo)" />
+                </div>
+
+                @*Ruta*@
+                <div class="form-group">
+                    <label>Ruta</label>
+                    <InputText @bind-Value="Error.ruta" class="form-control" />
+                    <ValidationMessage For="@(() => Error.ruta)" />
+                </div>
+
+                @*Importancia*@
+                <div class="form-group">
+                    <label>Importancia</label>
+                    <InputNumber @bind-Value="Error.importancia" class="form-control" />
+                    <ValidationMessage For="@(() => Error.importancia)" />
+                </div>
+
+                @*Fecha*@
+                <div class="form-group">
+                    <label>Fecha</label>
+                    <InputDate @bind-Value="Error.fecha" class="form-control" />
+                    <ValidationMessage For="@(() => Error.fecha)" />
+                </div>
+            </form>
+        </div>
+
+        <div class="card-footer">
+            <div class="form-group text-center" display: inline-block>
+                <button type="button" class="btn btn-lg btn-primary" @onclick="Nuevo">Nuevo</button>
+                <button type="submit" class="btn btn-lg btn-success">Guardar</button>
+                <button type="button" class="btn btn-lg btn-danger" @onclick="Eliminar">Eliminar</button>
+            </div>
+        </div>
+
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int errorId { get; set; }
+
+    private Errores Error = new Errores();
+
+    protected override void OnInitialized()
+    {
+        Nuevo();
+        Buscar();
+    }
+
+    public void Nuevo()
+    {
+        Error = new Errores();
+    }
+
+    private void Buscar()
+    {
+        if (Error.errorId > 0)
+        {
+            var encontrado = ErrorBLL.Buscar(Error.errorId);
+
+            if (encontrado != null)
+                this.Error = encontrado;
+            else
+                toast.ShowWarning("No encontrado");
+        }
+    }
+
+    public void Guardar()
+    {
+        bool guardo = false;
+
+        guardo = ErrorBLL.Guardar(Error);
+
+        if (guardo)
+        {
+            Nuevo();
+            toast.ShowSuccess("Guardado correctamente");
+        }
+        else
+            toast.ShowError("No fue posible guardar");
+    }
+
+    public void Eliminar()
+    {
+        bool elimino = false;
+
+        elimino = ErrorBLL.Eliminar(Error.errorId);
+
+        if (elimino)
+        {
+            Nuevo();
+            toast.ShowSuccess("Eliminado correctamente");
+        }
+        else
+            toast.ShowError("No fue posible eliminar");
+    }
+
+}
